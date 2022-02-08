@@ -74,6 +74,24 @@ async function run() {
       const result = await studentCollection.insertOne(student);
       res.json(result);
     });
+
+    // Student GET API
+    app.get("/students", async (req, res) => {
+      const cursor = studentCollection.find({});
+      const students = await cursor.sort({ _id: -1 }).toArray();
+      const count = await cursor.count();
+      res.json({ students, count });
+    });
+
+    // Student PUT API
+    app.put("/students", async (req, res) => {
+      const status = req.body.status;
+      const id = req.body.id;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = { $set: { status: status } };
+      const result = await studentCollection.updateOne(filter, updateDoc);
+      res.json(result);
+    });
   } finally {
     // await client.close();
   }
