@@ -32,8 +32,21 @@ async function run() {
 
     // Food Get API
     app.get("/foods", async (req, res) => {
-      const foods = await foodCollection.find({}).sort({ _id: -1 }).toArray();
-      res.json(foods);
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const cursor = foodCollection.find({});
+      const count = await cursor.count();
+      let foods;
+      if (page) {
+        foods = await cursor
+          .sort({ _id: -1 })
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+      } else {
+        foods = await cursor.sort({ _id: -1 }).toArray();
+      }
+      res.json({ foods, count });
     });
 
     // Food PUT API
@@ -44,6 +57,13 @@ async function run() {
         $set: { name: req.body.name, price: req.body.price },
       };
       const result = await foodCollection.updateOne(filter, updateDoc);
+      res.json(result);
+    });
+
+    // Food delete API
+    app.delete("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await foodCollection.deleteOne({ _id: ObjectId(id) });
       res.json(result);
     });
   } finally {
