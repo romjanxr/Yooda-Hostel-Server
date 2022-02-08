@@ -24,7 +24,28 @@ async function run() {
     const foodCollection = database.collection("foods");
 
     // Food Post API
-    app.post("/foods", async (req, res) => {});
+    app.post("/foods", async (req, res) => {
+      const foods = req.body;
+      const result = await foodCollection.insertOne(foods);
+      res.json(result);
+    });
+
+    // Food Get API
+    app.get("/foods", async (req, res) => {
+      const foods = await foodCollection.find({}).sort({ _id: -1 }).toArray();
+      res.json(foods);
+    });
+
+    // Food PUT API
+    app.put("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: { name: req.body.name, price: req.body.price },
+      };
+      const result = await foodCollection.updateOne(filter, updateDoc);
+      res.json(result);
+    });
   } finally {
     // await client.close();
   }
