@@ -22,6 +22,7 @@ async function run() {
     await client.connect();
     const database = client.db("YoodaHostelDB");
     const foodCollection = database.collection("foods");
+    const studentCollection = database.collection("students");
 
     // Food Post API
     app.post("/foods", async (req, res) => {
@@ -64,6 +65,13 @@ async function run() {
     app.delete("/foods/:id", async (req, res) => {
       const id = req.params.id;
       const result = await foodCollection.deleteOne({ _id: ObjectId(id) });
+      res.json(result);
+    });
+
+    // Students POST API
+    app.post("/students", async (req, res) => {
+      const student = req.body;
+      const result = await studentCollection.insertOne(student);
       res.json(result);
     });
   } finally {
