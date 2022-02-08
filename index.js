@@ -92,6 +92,32 @@ async function run() {
       const result = await studentCollection.updateOne(filter, updateDoc);
       res.json(result);
     });
+
+    // Student Full Update API
+    app.put("/studentProfile/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          name: req.body.name,
+          roll: req.body.roll,
+          age: req.body.age,
+          class: req.body.class,
+          hall: req.body.hall,
+          status: req.body.status,
+        },
+      };
+      const result = await studentCollection.updateOne(filter, updateDoc);
+      res.json(result);
+    });
+
+    // Student DELETE API
+    app.delete("/students/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await studentCollection.deleteOne({ _id: ObjectId(id) });
+      res.json(result);
+    });
   } finally {
     // await client.close();
   }
