@@ -23,6 +23,7 @@ async function run() {
     const database = client.db("YoodaHostelDB");
     const foodCollection = database.collection("foods");
     const studentCollection = database.collection("students");
+    const servedFoodCollection = database.collection("servedFood");
 
     // Food Post API
     app.post("/foods", async (req, res) => {
@@ -77,9 +78,20 @@ async function run() {
 
     // Student GET API
     app.get("/students", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
       const cursor = studentCollection.find({});
-      const students = await cursor.sort({ _id: -1 }).toArray();
       const count = await cursor.count();
+      let students;
+      if (page) {
+        students = await cursor
+          .sort({ _id: -1 })
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+      } else {
+        students = await cursor.sort({ _id: -1 }).toArray();
+      }
       res.json({ students, count });
     });
 
@@ -117,6 +129,20 @@ async function run() {
       const id = req.params.id;
       const result = await studentCollection.deleteOne({ _id: ObjectId(id) });
       res.json(result);
+    });
+
+    // Food Serve POST API
+    app.post("/served", async (req, res) => {
+      const servedFood = req.body;
+      const result = await servedFoodCollection.insertOne(servedFood);
+      res.json(result);
+    });
+
+    // Food Serve GET API
+    app.get("/served", async (req, res) => {
+      const cursor = servedFoodCollection.find({});
+      const servedFood = await cursor.sort({ _id: -1 }).toArray();
+      res.json(servedFood);
     });
   } finally {
     // await client.close();
